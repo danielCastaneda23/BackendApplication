@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container-fluid mt-5" style="width: 1000px;">
+        <form action="/api/productos" method="POST">
+            <div class="form-group">
+                <label>Ingresa El titulo Del Producto</label>
+                <input type="text" id="title" name="title" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Ingresa El Precio Del Producto $</label>
+                <input type="number" id="price" name="price" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Ingresa cdn de la foto del Producto</label>
+                <input type="text" id="thumbnail"name="thumbnail" class="form-control">
+            </div>
+            <a href="http://localhost:8080/public/index.html"><button type="submit" class="btn btn-primary"> Agregar Producto</button></a>
+        </form>
+        <div  class="row mt-4 justify-content-center text-center border"id="Products"></div>
+        <div class="row mt-4 justify-content-center bg-dark text-white">
+            <div class="col-12 h3">Centro De Mensajes</div>
+            <div class="col-12">
+            <form id="envioMensaje">
+                <label>Email: </label>
+                <input id="inputEmail" type="email border" placeholder="Ingrese su email">
+                <ul id="chat"></ul>
+                <label>Mensaje: </label>
+                <input id="mensajeChat" type="text" placeholder="Ingrese un mensaje">
+                <button class="btn-sm btn-primary ">Enviar</button>
+            </form>
+        </div>
+        </div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        var aux = ``;
+        var msgAux = ``;
+        let form = document.getElementById('envioMensaje')
+        let correo = document.getElementById('inputEmail')
+        let msg = document.getElementById('mensajeChat')
+        let allchats = document.getElementById('chat')
+        socket.on('products', (list) => {
+            list.map(item => {
+                aux += `
+                <div class="col-4 border-bottom">${item.title} </div>
+                <div class= "col-4 border-bottom"> ${item.price} </div>
+                <div class = "col-4 border-bottom"><img src=${item.thumbnail} alt=":)" width="40" height="auto" > </div>
+                `
+            })
+            document.getElementById("Products").innerHTML= aux
+            aux=``
+            })
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(!!correo.value){
+            let arregloMsg = {
+                email: correo.value,
+                mensaje: msg.value
+            }
+            socket.emit('Mensajes',arregloMsg)
+            correo.value = '';
+            msg.value = '';
+        }
+        })
+
+        socket.on('chat',(msg) => {
+            msg.map(x => {
+                msgAux += `
+                    <li style='list-style : none'><p style='color:blue;  display: inline'> ${x.email}</p> <p style='color:brown;  display: inline'> [${x.fecha}]</p> : <p style='color:green;  display: inline'> ${x.mensaje}</p> </li>
+                `
+            })
+            allchats.innerHTML=msgAux
+            msgAux = ''
+
+        })
+        
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
